@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
 from utils.data_processing import load_and_merge_data
 from pages.data_tab import render_data_tab
 from pages.optimal_price_tab import render_optimal_price_tab
@@ -60,6 +63,37 @@ if df_prod.empty:
     st.warning("Không có dữ liệu cho lựa chọn này.")
     st.stop()
 
+# Xử lý dữ liệu để tạo df_clean, poly_features, poly_model
+df_prod = df_prod.dropna(subset=['PRICE', 'QUANTITY'])
+# Loại bỏ outliers bằng IQR
+Q1_price = df_prod['PRICE'].quantile(0.25)
+Q3_price = df_prod['PRICE'].quantile(0.75)
+IQR_price = Q3_price - Q1_price
+lower_bound_price = Q1_price - 1.5 * IQR_price
+upper_bound_price = Q3_price + 1.5 * IQR_price
+
+Q1_qty = df_prod['QUANTITY'].quantile(0.25)
+Q3_qty = df_prod['QUANTITY'].quantile(0.75)
+IQR_qty = Q3_qty - Q1_qty
+lower_bound_qty = Q1_qty - 1.5 * IQR_qty
+upper_bound_qty = Q3_qty + 1.5 * IQR_qty
+
+df_clean = df_prod[
+    (df_prod['PRICE'] >= lower_bound_price) & 
+    (df_prod['PRICE'] <= upper_bound_price) &
+    (df_prod['QUANTITY'] >= lower_bound_qty) & 
+    (df_prod['QUANTITY'] <= upper_bound_qty)
+].copy()
+
+# Tính toán mô hình đa thức
+grp = df_clean.groupby('PRICE')['QUANTITY'].sum().reset_index()
+X = grp[['PRICE']].values
+y = grp['QUANTITY'].values
+poly_features = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly_features.fit_transform(X)
+poly_model = LinearRegression()
+poly_model.fit(X_poly, y)
+
 # Tạo các tab
 tabs = st.tabs([
     "📋 Dữ liệu", "📈 Giá tối ưu", "🔍 Phân tích giá", "💰 Thay đổi giá",
@@ -89,4 +123,4 @@ with tabs[8]:
 with tabs[9]:
     render_adjust_product_tab(merged)
 with tabs[10]:
-    render_personalized_pricing_tab(merged)
+    render_personalized_pricing_tab(merged, df_clean, poly_features, poly_model)

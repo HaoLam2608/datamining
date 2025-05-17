@@ -4,28 +4,15 @@ import numpy as np
 import altair as alt
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
 import uuid
-
-# Hàm đọc file dữ liệu
-def load_data():
-    try:
-        uploaded_file = st.file_uploader("Tải lên file dữ liệu khách hàng (CSV)", type=['csv'])
-        if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-            return df
-        else:
-            st.warning("Vui lòng tải lên file CSV chứa dữ liệu khách hàng")
-            return None
-    except Exception as e:
-        st.error(f"Lỗi khi đọc file: {e}")
-        return None
 
 # Hàm giả lập CUSTOMER_ID dựa trên dữ liệu giao dịch
 def generate_customer_ids(df, n_customers=100):
     """Tạo CUSTOMER_ID giả lập dựa trên mẫu giao dịch."""
     np.random.seed(42)
+    # Giả định số lượng khách hàng là n_customers
     customer_ids = [str(uuid.uuid4())[:8] for _ in range(n_customers)]
+    # Phân bổ ngẫu nhiên CUSTOMER_ID cho các giao dịch
     df['CUSTOMER_ID'] = np.random.choice(customer_ids, size=len(df))
     return df
 
@@ -47,15 +34,6 @@ def calculate_elasticity(df, group_col, price_col='PRICE', qty_col='QUANTITY'):
             elasticity_dict[group] = None
     return elasticity_dict
 
-# Hàm tạo mô hình polynomial
-def create_poly_model(df, degree=2):
-    X = df[['PRICE']].values
-    y = df['QUANTITY'].values
-    poly_features = PolynomialFeatures(degree=degree)
-    X_poly = poly_features.fit_transform(X)
-    poly_model = LinearRegression().fit(X_poly, y)
-    return poly_features, poly_model
-
 # Tab 11: Định giá cá nhân hóa
 def render_personalized_pricing_tab(merged, df_clean, poly_features, poly_model):
     st.header("👤 Định giá cá nhân hóa")
@@ -70,6 +48,7 @@ def render_personalized_pricing_tab(merged, df_clean, poly_features, poly_model)
 
     if not customer_col:
         st.info("Không tìm thấy cột CUSTOMER_ID. Đang giả lập dữ liệu khách hàng...")
+        # Giả lập CUSTOMER_ID
         merged = generate_customer_ids(merged.copy())
         customer_col = 'CUSTOMER_ID'
     else:
@@ -158,7 +137,7 @@ def render_personalized_pricing_tab(merged, df_clean, poly_features, poly_model)
                 'Thay đổi doanh thu (%)': round(revenue_change, 2),
                 'Đề xuất': recommendation
             })
-
+                                                                                                                                                                
         recommendations_df = pd.DataFrame(recommendations)
         st.dataframe(recommendations_df)
 

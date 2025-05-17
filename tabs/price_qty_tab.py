@@ -68,7 +68,7 @@ def render_price_qty_tab(df_prod, combo_label):
         st.subheader("Elasticity trung bình theo yếu tố")
         st.dataframe(df_el)
         
-        for factor_data in df_el['Yếu tố'].unique():
+        for factor in df_el['Yếu tố'].unique():
             df_plot = df_el[df_el['Yếu tố'] == factor]
             chart = alt.Chart(df_plot).mark_bar().encode(
                 x=alt.X('Giá trị:O', title=factor),

@@ -4,17 +4,17 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from utils.data_processing import load_and_merge_data
-from pages.data_tab import render_data_tab
-from pages.optimal_price_tab import render_optimal_price_tab
-from pages.price_analysis_tab import render_price_analysis_tab
-from pages.price_change_tab import render_price_change_tab
-from pages.competitor_tab import render_competitor_tab
-from pages.price_qty_tab import render_price_qty_tab
-from pages.seasonal_trend_tab import render_seasonal_trend_tab
-from pages.discount_tab import render_discount_tab
-from pages.promo_tab import render_promo_tab
-from pages.adjust_product_tab import render_adjust_product_tab
-from pages.personalized_pricing_tab import render_personalized_pricing_tab
+from tabs.data_tab import render_data_tab
+from tabs.optimal_price_tab import render_optimal_price_tab
+from tabs.price_analysis_tab import render_price_analysis_tab
+from tabs.price_change_tab import render_price_change_tab
+from tabs.competitor_tab import render_competitor_tab
+from tabs.price_qty_tab import render_price_qty_tab
+from tabs.seasonal_trend_tab import render_seasonal_trend_tab
+from tabs.discount_tab import render_discount_tab
+from tabs.promo_tab import render_promo_tab
+from tabs.adjust_product_tab import render_adjust_product_tab
+from tabs.personalized_pricing_tab import render_personalized_pricing_tab
 
 st.set_page_config(page_title="Tối Ưu Giá Bán Cafe & Phân Tích Đối Thủ", layout="wide")
 st.title("☕ Ứng dụng Tối Ưu & Phân Tích Giá Bán Cafe Shop (Cạnh Tranh)")

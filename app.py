@@ -123,4 +123,4 @@ with tabs[8]:
 with tabs[9]:
     render_adjust_product_tab(merged)
 with tabs[10]:
-    render_personalized_pricing_tab(merged, df_clean, poly_features, poly_model)
+    render_personalized_pricing_tab()

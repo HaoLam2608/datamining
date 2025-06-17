@@ -9,6 +9,15 @@ def render_price_analysis_tab(df_prod, combo_label):
     st.header("🔎 Phân Tích Giá ↔ Nhu Cầu")
     
     df_clean = clean_data(df_prod)
+
+    # Xử lý outlier theo phân vị 1% và 99%
+    initial_count = len(df_clean)
+    lower_q = df_clean['QUANTITY'].quantile(0.01)
+    upper_q = df_clean['QUANTITY'].quantile(0.99)
+    df_clean = df_clean[(df_clean['QUANTITY'] >= lower_q) & (df_clean['QUANTITY'] <= upper_q)]
+    filtered_count = len(df_clean)
+
+
     grp = df_clean.groupby('PRICE')['QUANTITY'].sum().reset_index()
     grp['Revenue'] = grp['PRICE'] * grp['QUANTITY']
     
@@ -36,15 +45,26 @@ def render_price_analysis_tab(df_prod, combo_label):
         title='Mối quan hệ giữa Giá và Số lượng bán'
     ).interactive()
     
-    # Thêm đường hồi quy
-    regression_line = scatter.transform_regression(
-        'PRICE', 'QUANTITY'
+   # Thêm đường hồi quy bậc hai (Polynomial)
+    regression_quad = alt.Chart(grp).transform_regression(
+        'PRICE', 'QUANTITY', method='poly', order=2
     ).mark_line(color='red').encode(
         x='PRICE',
         y='QUANTITY'
     )
+
     
-    st.altair_chart(scatter + regression_line, use_container_width=True)
+    st.altair_chart(scatter + regression_quad, use_container_width=True)
+
+
+    # Hiển thị phân phối số lượng
+    st.subheader("📊 Phân phối số lượng bán (QUANTITY)")
+    hist = alt.Chart(df_clean).mark_bar().encode(
+        alt.X("QUANTITY", bin=alt.Bin(maxbins=50), title="Số lượng"),
+        y='count()',
+        tooltip=['count()']
+    ).properties(title="Histogram số lượng bán")
+    st.altair_chart(hist, use_container_width=True)
     
     # Tính độ co giãn của cầu
     model, _, _ = train_polynomial_model(df_clean)
